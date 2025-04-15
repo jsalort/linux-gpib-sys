@@ -1,0 +1,13 @@
+[package]
+name = "linux-gpib-sys"
+version = "0.1.0"
+authors = ["Julien Salort <julien.salort@ens-lyon.fr>"]
+edition = "2024"
+license-file = "LICENSE.txt"
+description = "FFI bind to Linux-GPIB library"
+
+[build-dependencies]
+bindgen = "0.71"
+
+[lib]
+crate-type = ["lib", "cdylib"]
