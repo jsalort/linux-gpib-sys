@@ -5,6 +5,8 @@ authors = ["Julien Salort <julien.salort@ens-lyon.fr>"]
 edition = "2024"
 license-file = "LICENSE.txt"
 description = "FFI bind to Linux-GPIB library"
+repository = "https://github.com/jsalort/linux-gpib-sys"
+homepage = "https://github.com/jsalort/linux-gpib-rs"
 
 [build-dependencies]
 bindgen = "0.71"
