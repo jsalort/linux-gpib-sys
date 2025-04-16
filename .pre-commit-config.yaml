@@ -3,8 +3,4 @@ repos:
     rev: f794f329e4d0563a133f5a48782f463d70dac2ad
     hooks:
     - id: rust
-      exclude: |
-        (?x) (
-            ^example/|
-        )
     - id: clang

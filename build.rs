@@ -1,7 +1,5 @@
 #[cfg(feature = "bindgen")]
 use std::env;
-
-#[cfg(any(not(docsrs), feature = "bindgen"))]
 use std::path::PathBuf;
 
 #[cfg(feature = "bindgen")]
@@ -19,7 +17,6 @@ fn find_include_dir() -> Option<&'static str> {
     None
 }
 
-#[cfg(not(docsrs))]
 fn find_library_dir() -> Option<&'static str> {
     const POSSIBLE_LIB_DIR: [&'static str; 2] = ["/usr/lib", "/usr/local/lib"];
     for library_dir in POSSIBLE_LIB_DIR {
@@ -33,11 +30,14 @@ fn find_library_dir() -> Option<&'static str> {
     None
 }
 
-#[cfg(not(docsrs))]
 fn add_lib() {
-    let lib_dir = find_library_dir().expect("libgpib.so not found.");
-    println!(r"cargo:rustc-link-search={lib_dir}");
-    println!(r"cargo:rustc-link-lib=dylib=gpib");
+    if std::env::var("DOCS_RS").is_ok() {
+        // do nothing
+    } else {
+        let lib_dir = find_library_dir().expect("libgpib.so not found.");
+        println!(r"cargo:rustc-link-search={lib_dir}");
+        println!(r"cargo:rustc-link-lib=dylib=gpib");
+    }
 }
 
 #[cfg(feature = "bindgen")]
@@ -57,7 +57,6 @@ fn generate_bindings() {
 }
 
 fn main() {
-    #[cfg(not(docsrs))]
     add_lib();
     #[cfg(feature = "bindgen")]
     generate_bindings();
