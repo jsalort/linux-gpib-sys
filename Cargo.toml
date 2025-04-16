@@ -8,6 +8,13 @@ description = "FFI bind to Linux-GPIB library"
 repository = "https://github.com/jsalort/linux-gpib-sys"
 homepage = "https://github.com/jsalort/linux-gpib-rs"
 
+[package.metadata.docs.rs]
+no-default-features = true
+
+[features]
+default = ["bindgen"]
+bindgen = ["dep:bindgen"]
+
 [build-dependencies]
 bindgen = { version = "0.71", optional = true }
 
