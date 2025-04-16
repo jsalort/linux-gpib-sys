@@ -1,10 +1,12 @@
+#[cfg(feature = "bindgen")]
 use std::env;
+
+#[cfg(any(not(docsrs), feature = "bindgen"))]
 use std::path::PathBuf;
 
-const POSSIBLE_INCLUDE_DIR: [&'static str; 2] = ["/usr/include", "/usr/local/include"];
-const POSSIBLE_LIB_DIR: [&'static str; 2] = ["/usr/lib", "/usr/local/lib"];
-
+#[cfg(feature = "bindgen")]
 fn find_include_dir() -> Option<&'static str> {
+    const POSSIBLE_INCLUDE_DIR: [&'static str; 2] = ["/usr/include", "/usr/local/include"];
     for include_dir in POSSIBLE_INCLUDE_DIR {
         let header_dir = PathBuf::from(include_dir.to_owned());
         let mut header_file = header_dir.clone();
@@ -17,7 +19,9 @@ fn find_include_dir() -> Option<&'static str> {
     None
 }
 
+#[cfg(not(docsrs))]
 fn find_library_dir() -> Option<&'static str> {
+    const POSSIBLE_LIB_DIR: [&'static str; 2] = ["/usr/lib", "/usr/local/lib"];
     for library_dir in POSSIBLE_LIB_DIR {
         let library_dir_path = PathBuf::from(library_dir.to_owned());
         let mut library_file = library_dir_path.clone();
@@ -29,15 +33,19 @@ fn find_library_dir() -> Option<&'static str> {
     None
 }
 
-fn linux_gpib() {
-    let _include_dir = find_include_dir().expect("gpib/ib.h not found.");
+#[cfg(not(docsrs))]
+fn add_lib() {
     let lib_dir = find_library_dir().expect("libgpib.so not found.");
     println!(r"cargo:rustc-link-search={lib_dir}");
     println!(r"cargo:rustc-link-lib=dylib=gpib");
+}
 
+#[cfg(feature = "bindgen")]
+fn generate_bindings() {
+    let include_dir = find_include_dir().expect("gpib/ib.h not found.");
     let bindings = bindgen::Builder::default()
         .header("headers/gpib.h")
-        .clang_arg(r"-I{include_dir}")
+        .clang_arg(format!("-I{}", include_dir))
         .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
         .generate()
         .expect("Unable to generate bindings for gpib/ib.h");
@@ -49,5 +57,8 @@ fn linux_gpib() {
 }
 
 fn main() {
-    linux_gpib();
+    #[cfg(not(docsrs))]
+    add_lib();
+    #[cfg(feature = "bindgen")]
+    generate_bindings();
 }
