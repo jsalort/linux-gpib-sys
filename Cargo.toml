@@ -1,6 +1,6 @@
 [package]
 name = "linux-gpib-sys"
-version = "0.1.2"
+version = "0.1.3"
 authors = ["Julien Salort <julien.salort@ens-lyon.fr>"]
 edition = "2024"
 license-file = "LICENSE.txt"
@@ -8,15 +8,8 @@ description = "FFI bind to Linux-GPIB library"
 repository = "https://github.com/jsalort/linux-gpib-sys"
 homepage = "https://github.com/jsalort/linux-gpib-rs"
 
-[package.metadata.docs.rs]
-no-default-features = true
-
-[features]
-default = ["bindgen"]
-bindgen = ["dep:bindgen"]
-
 [build-dependencies]
-bindgen = { version = "0.71", optional = true }
+bindgen = "0.71"
 
 [lib]
 crate-type = ["lib", "cdylib"]

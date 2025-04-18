@@ -1,8 +1,6 @@
-#[cfg(feature = "bindgen")]
 use std::env;
 use std::path::PathBuf;
 
-#[cfg(feature = "bindgen")]
 fn find_include_dir() -> Option<&'static str> {
     const POSSIBLE_INCLUDE_DIR: [&'static str; 2] = ["/usr/include", "/usr/local/include"];
     for include_dir in POSSIBLE_INCLUDE_DIR {
@@ -31,17 +29,12 @@ fn find_library_dir() -> Option<&'static str> {
 }
 
 fn add_lib() {
-    if std::env::var("DOCS_RS").is_ok() {
-        // do nothing
-    } else {
-        let lib_dir = find_library_dir().expect("libgpib.so not found.");
-        println!(r"cargo:rustc-link-search={lib_dir}");
-        println!(r"cargo:rustc-link-lib=dylib=gpib");
-    }
+    let lib_dir = find_library_dir().expect("libgpib.so not found.");
+    println!(r"cargo:rustc-link-search={lib_dir}");
+    println!(r"cargo:rustc-link-lib=dylib=gpib");
 }
 
-#[cfg(feature = "bindgen")]
-fn generate_bindings() {
+fn generate_bindings(bindings_path: PathBuf) {
     let include_dir = find_include_dir().expect("gpib/ib.h not found.");
     let bindings = bindgen::Builder::default()
         .header("headers/gpib.h")
@@ -49,15 +42,19 @@ fn generate_bindings() {
         .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
         .generate()
         .expect("Unable to generate bindings for gpib/ib.h");
-
-    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
     bindings
-        .write_to_file(out_path.join("linux_gpib.rs"))
+        .write_to_file(bindings_path)
         .expect("Couldn't write linux_gpib.rs");
 }
 
 fn main() {
-    add_lib();
-    #[cfg(feature = "bindgen")]
-    generate_bindings();
+    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
+    let bindings_path = out_path.join("linux_gpib.rs");
+    if std::env::var("DOCS_RS").is_ok() {
+        let prebind_file = PathBuf::from("src/prebind/linux_gpib.rs");
+        std::fs::copy(&prebind_file, &bindings_path).expect(&format!("Unable to copy {:?} to {:?}.", prebind_file, bindings_path));
+    } else {
+        add_lib();
+        generate_bindings(bindings_path);
+    }
 }
