@@ -50,9 +50,12 @@ fn generate_bindings(bindings_path: PathBuf) {
 fn main() {
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
     let bindings_path = out_path.join("linux_gpib.rs");
-    if std::env::var("DOCS_RS").is_ok() {
+    if std::env::var("DOCS_RS").is_ok() || std::env::var("NO_LOCAL_LIB").is_ok() {
         let prebind_file = PathBuf::from("src/prebind/linux_gpib.rs");
-        std::fs::copy(&prebind_file, &bindings_path).expect(&format!("Unable to copy {:?} to {:?}.", prebind_file, bindings_path));
+        std::fs::copy(&prebind_file, &bindings_path).expect(&format!(
+            "Unable to copy {:?} to {:?}.",
+            prebind_file, bindings_path
+        ));
     } else {
         add_lib();
         generate_bindings(bindings_path);
